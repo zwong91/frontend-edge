@@ -252,6 +252,8 @@ export default function Home() {
 
             websocket.onclose = () => {
               console.log("WebSocket connection closed...");
+              if (connectionStatus == "Closed")
+                  return
               setConnectionStatus("Reconnecting...");
               setTimeout(reconnectWebSocket, 5000);
             };
@@ -322,10 +324,6 @@ export default function Home() {
     setIsRecording(false);
     setIsPlayingAudio(false);
     setConnectionStatus("Closed");
-
-    console.log('阻塞开始');
-    blockFor(600000); // 阻塞 60 秒
-    console.log('阻塞结束');
   }
 
   return (
