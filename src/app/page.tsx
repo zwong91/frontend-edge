@@ -303,10 +303,6 @@ export default function Home() {
   // 添加状态来跟踪是否在通话中
   const [isInCall, setIsInCall] = useState(true);
 
-  function blockFor(milliseconds) {
-    const start = Date.now();
-    while (Date.now() - start < milliseconds) {}
-  }
   // End call function
   async function endCall() {
     if (socket) {
