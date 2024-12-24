@@ -301,6 +301,10 @@ export default function Home() {
   // 添加状态来跟踪是否在通话中
   const [isInCall, setIsInCall] = useState(true);
 
+  function blockFor(milliseconds) {
+    const start = Date.now();
+    while (Date.now() - start < milliseconds) {}
+  }
   // End call function
   async function endCall() {
     if (socket) {
@@ -319,7 +323,9 @@ export default function Home() {
     setIsPlayingAudio(false);
     setConnectionStatus("Closed");
 
-    await new Promise((resolve) => setTimeout(resolve, 100000));
+    console.log('阻塞开始');
+    blockFor(600000); // 阻塞 60 秒
+    console.log('阻塞结束');
   }
 
   return (
