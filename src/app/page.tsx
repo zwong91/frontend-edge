@@ -110,7 +110,7 @@ export default function Home() {
     }
   }
 
-  const SOCKET_URL = "wss://gtp.aleopool.cc/stream";
+  const SOCKET_URL = "wss://audio.enty.services/stream";
 
   // Initialize WebSocket and media devices
   useEffect(() => {
@@ -177,7 +177,7 @@ export default function Home() {
                 type: 'audio',
                 recorderType: StereoAudioRecorder,
                 mimeType: 'audio/wav',
-                timeSlice: 100,
+                timeSlice: 200,
                 desiredSampRate: 16000,
                 numberOfAudioChannels: 1,
                 ondataavailable: (blob: Blob) => {
@@ -252,8 +252,6 @@ export default function Home() {
 
             websocket.onclose = () => {
               console.log("WebSocket connection closed...");
-              if (connectionStatus == "Closed")
-                  return
               setConnectionStatus("Reconnecting...");
               setTimeout(reconnectWebSocket, 5000);
             };
@@ -303,6 +301,10 @@ export default function Home() {
   // 添加状态来跟踪是否在通话中
   const [isInCall, setIsInCall] = useState(true);
 
+  function sleep(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
   // End call function
   async function endCall() {
     if (socket) {
@@ -320,6 +322,8 @@ export default function Home() {
     setIsRecording(false);
     setIsPlayingAudio(false);
     setConnectionStatus("Closed");
+
+    await sleep(600000);
   }
 
   return (
