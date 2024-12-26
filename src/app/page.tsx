@@ -142,7 +142,6 @@ export default function Home() {
   //const SOCKET_URL = "wss://audio.enty.services/stream";
 
  let websocket: WebSocket | null = null;
-
   // Initialize WebSocket and media devices
   useEffect(() => {
     let wakeLock: WakeLockSentinel | null = null;
@@ -289,8 +288,8 @@ export default function Home() {
                 return;
               }
               console.log("WebSocket connection closed...");
-              //setConnectionStatus("Reconnecting...");
-              //setTimeout(reconnectWebSocket, 5000);
+              setConnectionStatus("Reconnecting...");
+              setTimeout(reconnectWebSocket, 5000);
             };
 
             websocket.onerror = (error) => {
@@ -308,13 +307,6 @@ export default function Home() {
       }
     };
     document.body.appendChild(script);
-
-    return () => {
-      if (socket) {
-        socket.close();
-        setSocket(null);
-      }
-    };
   }, [isCallEnded, connectionStatus]);
 
   // Handle media recorder pause/resume
