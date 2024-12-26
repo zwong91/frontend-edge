@@ -289,8 +289,6 @@ export default function Home() {
                 console.log("WebSocket 已关闭");
                 return;
               }
-	      websocket?.close();
-
               console.log("WebSocket connection closed...");
               setConnectionStatus("Reconnecting...");
               setTimeout(reconnectWebSocket, 5000);
