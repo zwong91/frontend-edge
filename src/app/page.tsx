@@ -142,6 +142,7 @@ export default function Home() {
   //const SOCKET_URL = "wss://audio.enty.services/stream";
 
  let websocket: WebSocket | null = null;
+
   // Initialize WebSocket and media devices
   useEffect(() => {
     let wakeLock: WakeLockSentinel | null = null;
@@ -169,6 +170,19 @@ export default function Home() {
     };
   }, []);
 
+  // Access the microphone and start recording
+  useEffect(() => {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+        setMediaRecorder(new MediaRecorder(stream));
+      }).catch((error) => {
+        console.error("Error accessing media devices.", error);
+      });
+    } else {
+      console.error("Media devices API not supported.");
+    }
+  }, []);
+
   // Handle WebSocket connection and messaging
   useEffect(() => {
     const script = document.createElement("script");
@@ -176,8 +190,9 @@ export default function Home() {
     script.onload = () => {
       const RecordRTC = (window as any).RecordRTC;
       const StereoAudioRecorder = (window as any).StereoAudioRecorder;
-      // Access the microphone and start recording
-      if (navigator.mediaDevices.getUserMedia({ audio: true })).then((stream) => {
+
+      if (navigator) {
+        navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
 
           const reconnectWebSocket = () => {
             if (manualClose || isCallEnded) {
@@ -274,8 +289,8 @@ export default function Home() {
                 return;
               }
               console.log("WebSocket connection closed...");
-              setConnectionStatus("Reconnecting...");
-              setTimeout(reconnectWebSocket, 5000);
+              //setConnectionStatus("Reconnecting...");
+              //setTimeout(reconnectWebSocket, 5000);
             };
 
             websocket.onerror = (error) => {
@@ -290,8 +305,16 @@ export default function Home() {
         }).catch((error) => {
           console.error("Error with getUserMedia", error);
         });
+      }
     };
     document.body.appendChild(script);
+
+    return () => {
+      if (socket) {
+        socket.close();
+        setSocket(null);
+      }
+    };
   }, [isCallEnded, connectionStatus]);
 
   // Handle media recorder pause/resume
