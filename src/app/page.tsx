@@ -149,7 +149,7 @@ export default function Home() {
     }
   }
 
-  const SOCKET_URL = "wss://audio.enty.services/stream";
+  const SOCKET_URL = "wss://gtp.aleopool.cc/stream";
 
   // Initialize WebSocket and media devices
   useEffect(() => {
