@@ -19,13 +19,13 @@ export default function Home() {
 
   const [connectionStatus, setConnectionStatus] = useState<string>("Connecting..."); // State to track connection status
 
-  let manualClose = false;
-  let audioContext: AudioContext | null = null;
-  let audioBufferQueue: AudioBuffer[] = [];
+  const manualCloseRef = useRef(false);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const audioBufferQueueRef = useRef<AudioBuffer[]>([]);
 
   // Check if AudioContext is available in the browser
   if (typeof window !== "undefined" && window.AudioContext) {
-    audioContext = new AudioContext();
+    audioContextRef.current = new AudioContext();
   }
 
   const audioManager = {
@@ -33,7 +33,7 @@ export default function Home() {
       if (isPlayingAudio) {
         setIsPlayingAudio(false);
       }
-      audioBufferQueue = [];
+      audioBufferQueueRef.current = [];
     },
 
     playNewAudio: async (audioBlob: Blob) => {
@@ -96,10 +96,10 @@ export default function Home() {
 
   // Buffer audio and add it to the queue
   function bufferAudio(data: ArrayBuffer) {
-    if (audioContext) {
-      audioContext.decodeAudioData(data, (buffer) => {
+    if (audioContextRef.current) {
+      audioContextRef.current.decodeAudioData(data, (buffer) => {
         // Buffer the audio chunk and push it to the queue
-        audioBufferQueue.push(buffer);
+        audioBufferQueueRef.current.push(buffer);
 
         // If we are not already playing, start playing the audio
         if (!isPlayingAudio) {
@@ -111,19 +111,19 @@ export default function Home() {
 
   // Play the buffered audio chunks from the queue
   function playAudioBufferQueue() {
-    if (audioBufferQueue.length === 0) {
+    if (audioBufferQueueRef.current.length === 0) {
       setIsPlayingAudio(false); // Stop playback if queue is empty
       setIsRecording(true); // Start recording again
       return;
     }
 
-    const buffer = audioBufferQueue.shift(); // Get the next audio buffer
-    if (buffer && audioContext) {
-      const source = audioContext.createBufferSource();
+    const buffer = audioBufferQueueRef.current.shift(); // Get the next audio buffer
+    if (buffer && audioContextRef.current) {
+      const source = audioContextRef.current.createBufferSource();
       source.buffer = buffer;
 
       // Connect the source to the audio context's output
-      source.connect(audioContext.destination);
+      source.connect(audioContextRef.current.destination);
 
       // When this audio ends, play the next one
       source.onended = () => {
@@ -139,6 +139,7 @@ export default function Home() {
   }
 
   const SOCKET_URL = "wss://gtp.aleopool.cc/stream";
+  //const SOCKET_URL = "wss://audio.enty.services/stream";
 
   // Initialize WebSocket and media devices
   useEffect(() => {
@@ -193,12 +194,14 @@ export default function Home() {
           let websocket: WebSocket | null = null;
 
           const reconnectWebSocket = () => {
-            if (manualClose || isCallEnded) {
+            if (manualCloseRef.current || isCallEnded) {
               console.log("Reconnection prevented by manualClose or isCallEnded flag.");
               return;
             }
 
-            if (websocket) websocket.close();
+            if (websocket) {
+              websocket.close();
+            }
             websocket = new WebSocket(SOCKET_URL);
             setSocket(websocket);
 
@@ -281,11 +284,13 @@ export default function Home() {
             };
 
             websocket.onclose = () => {
-              if (manualClose || isCallEnded) return; // Don't reconnect if the call has ended
+              if (manualCloseRef.current || isCallEnded) return; // Don't reconnect if the call has ended
               if (connectionStatus === "Closed") {
                 console.log("WebSocket 已关闭");
                 return;
               }
+	      websocket?.close();
+
               console.log("WebSocket connection closed...");
               setConnectionStatus("Reconnecting...");
               setTimeout(reconnectWebSocket, 5000);
@@ -297,8 +302,10 @@ export default function Home() {
             };
           };
 
-          if (manualClose || isCallEnded) return;
+          if (manualCloseRef.current || isCallEnded) return;
           console.log("client start connect to websocket");
+	  websocket?.close();
+
           reconnectWebSocket();
         }).catch((error) => {
           console.error("Error with getUserMedia", error);
@@ -340,7 +347,7 @@ export default function Home() {
   const [isInCall, setIsInCall] = useState(true);
 
   const endCall = async () => {
-    manualClose = true;
+    manualCloseRef.current = true;
     setConnectionStatus("Closed");
     setIsCallEnded(true); // Set isCallEnded to true to prevent reconnection
 
