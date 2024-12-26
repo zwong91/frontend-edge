@@ -177,7 +177,7 @@ export default function Home() {
       const RecordRTC = (window as any).RecordRTC;
       const StereoAudioRecorder = (window as any).StereoAudioRecorder;
       // Access the microphone and start recording
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      if (navigator.mediaDevices) {
         navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
 
           const reconnectWebSocket = () => {
