@@ -170,19 +170,6 @@ export default function Home() {
     };
   }, []);
 
-  // Access the microphone and start recording
-  useEffect(() => {
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-        setMediaRecorder(new MediaRecorder(stream));
-      }).catch((error) => {
-        console.error("Error accessing media devices.", error);
-      });
-    } else {
-      console.error("Media devices API not supported.");
-    }
-  }, []);
-
   // Handle WebSocket connection and messaging
   useEffect(() => {
     const script = document.createElement("script");
@@ -193,7 +180,7 @@ export default function Home() {
 
       if (navigator) {
         navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-
+        console.log("RecordRTC start.");
           const reconnectWebSocket = () => {
             if (manualClose || isCallEnded) {
               console.log("Reconnection prevented by manualClose or isCallEnded flag.");
