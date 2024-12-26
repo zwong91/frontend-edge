@@ -290,8 +290,8 @@ export default function Home() {
                 return;
               }
               console.log("WebSocket connection closed...");
-              setConnectionStatus("Reconnecting...");
-              setTimeout(reconnectWebSocket, 5000);
+              //setConnectionStatus("Reconnecting...");
+              //setTimeout(reconnectWebSocket, 5000);
             };
 
             websocket.onerror = (error) => {
@@ -302,8 +302,6 @@ export default function Home() {
 
           if (manualCloseRef.current || isCallEnded) return;
           console.log("client start connect to websocket");
-	  websocket?.close();
-
           reconnectWebSocket();
         }).catch((error) => {
           console.error("Error with getUserMedia", error);
